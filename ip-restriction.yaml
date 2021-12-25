@@ -1,0 +1,31 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongClusterPlugin
+metadata:
+  name: ip-restriction
+  namespace: echo
+  annotations:
+    kubernetes.io/ingress.class: kong
+config:
+  allow:
+    - 54.13.21.1
+plugin: ip-restriction
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    konghq.com/plugins: ip-restriction
+  name: kong-ingress-2
+  namespace: echo
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: /v2
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: http-echo-2
+                port:
+                  number: 8080

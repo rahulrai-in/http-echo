@@ -1,0 +1,33 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: http-log
+  namespace: echo
+config:
+  http_endpoint: http://mockbin.org/bin/:id
+  method: POST
+  timeout: 1000
+  keepalive: 1000
+  flush_timeout: 2
+  retry_count: 15
+plugin: http-log
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    konghq.com/plugins: http-log
+  name: kong-ingress
+  namespace: echo
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: http-echo
+                port:
+                  number: 8080
